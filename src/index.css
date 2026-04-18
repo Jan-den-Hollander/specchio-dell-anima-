@@ -1,1 +1,22 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500&display=swap');
 
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Nunito", sans-serif;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-120%); opacity: 0.4; }
+  50% { transform: translateX(120%); opacity: 1; }
+  100% { transform: translateX(-120%); opacity: 0.4; }
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thumb-[#c9a84c]/20::-webkit-scrollbar-thumb {
+  background-color: rgba(201, 168, 124, 0.2);
+  border-radius: 20px;
+}
