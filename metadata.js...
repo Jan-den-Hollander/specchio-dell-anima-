@@ -1,0 +1,4 @@
+export const metadata = {
+  title: "Specchio Magico",
+  description: "Impara il tedesco con il tuo specchio magico",
+};
