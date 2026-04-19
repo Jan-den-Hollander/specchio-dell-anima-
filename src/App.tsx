@@ -324,9 +324,12 @@ export default function App() {
       let attempt = 0;
       const result = await fetchWithRetry(async () => {
         attempt++;
-        if (attempt > 1) setStatus(`Nuovo tentativo ${attempt}/3... · Poging ${attempt}/3...`);
+        // Poging 1: snel model (2.5-flash); bij traag/fout → fallback naar 2.0-flash
+        const model = attempt === 1 ? "gemini-2.5-flash" : "gemini-2.0-flash";
+        if (attempt === 2) setStatus(`Tentativo 2 con modello veloce... · Poging 2 met sneller model...`);
+        if (attempt === 3) setStatus(`Ultimo tentativo... · Laatste poging...`);
         return aiInstance.models.generateContent({
-          model: "gemini-2.0-flash",
+          model,
           contents: contents.length ? contents : [{ role: 'user', parts: [{ text: 'Inizia il dialogo con una frase ispiratrice.' }] }],
           config: { systemInstruction, responseMimeType: "application/json" },
         });
