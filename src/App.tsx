@@ -210,6 +210,18 @@ export default function App() {
   const streamRef = useRef<MediaStream | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // AudioContext eenmalig aanmaken/hergebruiken (vereist door DuckDuckGo, Safari, Edge)
+  const getAudioCtx = (): AudioContext => {
+    if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  };
 
   useEffect(() => {
     startCamera();
@@ -265,7 +277,7 @@ export default function App() {
       );
       const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if (base64Audio) {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioCtx = getAudioCtx();
         const arrayBuffer = Uint8Array.from(atob(base64Audio), (c: string) => c.charCodeAt(0)).buffer;
         const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
         const source = audioCtx.createBufferSource();
