@@ -239,6 +239,15 @@ export default function App() {
     setStatus('Chiave salvata! · Sleutel opgeslagen!');
   };
 
+  // Wacht tot browser-stemmen geladen zijn (nodig op mobiel/Samsung)
+  const getVoices = (): Promise<SpeechSynthesisVoice[]> =>
+    new Promise(resolve => {
+      const v = window.speechSynthesis.getVoices();
+      if (v.length) { resolve(v); return; }
+      window.speechSynthesis.onvoiceschanged = () => resolve(window.speechSynthesis.getVoices());
+      setTimeout(() => resolve(window.speechSynthesis.getVoices()), 1500);
+    });
+
   const speakIt = async (text: string) => {
     if (!text) return;
     setIsSpeaking(true);
@@ -269,15 +278,19 @@ export default function App() {
     } catch {
       // stil falen -> browser TTS
     }
+    // Browser TTS fallback — wacht op voices (essentieel op Samsung/mobiel)
     window.speechSynthesis.cancel();
+    const voices = await getVoices();
+    const itVoice = voices.find(v => v.lang.startsWith('it-'))
+                 || voices.find(v => v.lang.startsWith('it'))
+                 || voices[0];
     const utt = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const itVoice = voices.find(v => v.lang.startsWith('it')) || voices[0];
     if (itVoice) utt.voice = itVoice;
     utt.lang = 'it-IT';
     utt.rate = 0.88;
     utt.pitch = 1.05;
     utt.onend = () => setIsSpeaking(false);
+    utt.onerror = () => setIsSpeaking(false);
     window.speechSynthesis.speak(utt);
   };
 
@@ -517,6 +530,16 @@ export default function App() {
                       <span style={styles.bubbleIt}>{msg.it}</span>
                       {msg.insight && <span style={styles.bubbleInsight}>· {msg.insight} ·</span>}
                       <span style={styles.bubbleNl}>{msg.nl}</span>
+                      <button
+                        onClick={() => speakIt(msg.it)}
+                        title="Voorlezen · Leggi ad alta voce"
+                        style={{
+                          alignSelf: 'flex-end', marginTop: 4,
+                          background: 'none', border: 'none',
+                          cursor: 'pointer', fontSize: 15, opacity: 0.55,
+                          padding: '2px 4px', lineHeight: 1,
+                        }}
+                      >🔊</button>
                     </>
                   ) : msg.role === 'error' ? (
                     <>
