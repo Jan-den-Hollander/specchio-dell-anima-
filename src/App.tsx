@@ -1,20 +1,12 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- * Specchio dell'Anima - Ispirato da Stefano Rossi
- */
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { GoogleGenAI, Modality } from "@google/genai";
-import { Mic, MicOff, RotateCcw, Heart, Lightbulb, Save, Key } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-
-interface Message {
-  role: 'user' | 'model' | 'error';
-  it: string;
-  nl: string;
-  insight?: string;
-}
-
-const SYSTEM_PROMPT = `Sei lo "Specchio dell'Anima", un mentore empatico ispirato alla psicologia di Stefano Rossi.
+    label: 'Nederlands',
+    ],
+    title: 'Hoe gebruik je de Spiegel',
+    steps: [
+      { icon: '🔑', text: 'Voer je Gemini API-sleutel in via de knop "Configura API Key" onderaan.' },
+      { icon: '📷', text: 'Geef toegang tot de camera: je ziet je eigen gezicht in de spiegel.' },
+      { icon: '🎤', text: 'Houd de microfoonknop ingedrukt en spreek Italiaans. Vertel een droom, een angst, een wens.' },
+      { icon: '🪞', text: 'De Spiegel antwoordt met een diepe zin geïnspireerd op Stefano Rossi, met Nederlandse vertaling.' },
+      { icon: '🔊', text: 'Het antwoord wordt hardop voorgelezen (Gemini TTS of browserstem als reserveoptie).' },
+      { icon: '💡', text: 'Gebruik de Focus- en Mood-knoppen om het gesprek te richten op dromen, talenten, angsten of toekomst.' },
+      { icon: '💾', text: 'Sla je pad op met de Opslaan-knop. Begin opnieuw met de Herstart-knop.' },
+      { icon: '🆓', text: 'Gratis API-sleutel via: aistudio.google.com → "Get API Key".' },
