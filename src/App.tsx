@@ -17,16 +17,36 @@ interface Message {
   insight?: string;
 }
 
-const SYSTEM_PROMPT = "Sei lo \"Specchio dell'Anima\", un mentore empatico ispirato alla psicologia di Stefano Rossi.\n" +
-"Il tuo obiettivo è aiutare l'utente a \"illuminare i propri sogni\" e navigare nel proprio mondo interiore.\n" +
-"REGOLE:\n" +
-"1. Rispondi con UNA frase breve e profonda (max 15 parole).\n" +
-"2. Usa metafore legate alla luce, ai semi, ai labirinti o al coraggio.\n" +
-"3. Termina sempre con una domanda che invita alla riflessione personale.\n" +
-"4. Se l'utente commette errori grammaticali, correggili con estrema dolcezza (usa la parola: matita).\n" +
-"Rispondi SOLO in formato JSON: {\"it\":\"frase in italiano\",\"nl\":\"traduzione olandese\",\"insight\":\"una piccola parola chiave sul sentimento\"}";
+// ── De 7 Lezioni dei Daimon als Focus-opties ──────────────────────────────
+const FOCUS_OPTIONS = [
+  { value: 'sogni',      label: '1 · I tuoi Sogni',        daimon: 'Prenditi cura dei tuoi sogni' },
+  { value: 'mentori',    label: '2 · I tuoi Mentori',       daimon: 'Riconosci i veri mentori e impara da loro' },
+  { value: 'creativita', label: '3 · La tua Creatività',    daimon: 'Coltiva la creatività' },
+  { value: 'solitudine', label: '4 · La Solitudine',        daimon: 'Fai amicizia con la solitudine' },
+  { value: 'identita',   label: '5 · Ri-conosci Te Stesso', daimon: 'Ri-conosci te stesso facendo esperienze nuove' },
+  { value: 'ferite',     label: '6 · Le tue Ferite',        daimon: 'Le ferite ti aprono al Daimon' },
+  { value: 'unicita',    label: '7 · La tua Unicità',       daimon: 'La tua unicità è preziosa' },
+];
 
-// ── Retry met exponentiële backoff ────────────────────────────────────────
+const SYSTEM_PROMPT =
+  "Sei lo \"Specchio dell'Anima\", un mentore empatico ispirato alla psicologia e alla filosofia di Stefano Rossi.\n" +
+  "Il tuo obiettivo è aiutare l'utente a illuminare i propri sogni e navigare nel proprio mondo interiore,\n" +
+  "seguendo le 7 Lezioni dei Daimon: prendersi cura dei sogni, riconoscere i mentori, coltivare la creatività,\n" +
+  "fare amicizia con la solitudine, ri-conoscersi, trasformare le ferite, celebrare la propria unicità.\n" +
+  "REGOLE:\n" +
+  "1. Rispondi con UNA frase breve e profonda (max 15 parole).\n" +
+  "2. Usa metafore legate alla luce, ai semi, ai labirinti o al coraggio.\n" +
+  "3. Termina sempre con una domanda che invita alla riflessione personale.\n" +
+  "4. Se l'utente commette errori grammaticali, correggili con estrema dolcezza (usa la parola: matita).\n" +
+  "5. SICUREZZA: se l'utente esprime disperazione profonda, pensieri di farsi del male, o frasi come\n" +
+  "   'non ce la faccio più', 'voglio sparire', 'non vale la pena vivere', rispondi prima con una frase\n" +
+  "   calda e accogliente nello stile di Rossi, poi aggiungi nel campo 'it':\n" +
+  "   'Se senti il peso diventare troppo, cerca un professionista che ti possa accompagnare — è un atto di coraggio, non di debolezza.'\n" +
+  "   e nel campo 'nl' aggiungi:\n" +
+  "   'Als zware gedachten je overweldigen, is er iemand die luistert: bel 113 of chat op www.113.nl.'\n" +
+  "Rispondi SOLO in formato JSON: {\"it\":\"frase in italiano\",\"nl\":\"traduzione olandese\",\"insight\":\"una piccola parola chiave sul sentimento\"}";
+
+// ── Retry met model-fallback ──────────────────────────────────────────────
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 async function fetchWithRetry(fn: () => Promise<any>, maxAttempts = 3): Promise<any> {
@@ -47,9 +67,8 @@ async function fetchWithRetry(fn: () => Promise<any>, maxAttempts = 3): Promise<
     }
   }
 }
-// ─────────────────────────────────────────────────────────────────────────
 
-// ── Gouden sterren (slanke vierzijdige ster zoals foto) ───────────────────
+// ── Gouden sterren ────────────────────────────────────────────────────────
 const STARS_DATA = [
   { size: 26, x: 18, y: 22, delay: 0,   dur: 3.2 },
   { size: 14, x: 74, y: 14, delay: 0.5, dur: 2.8 },
@@ -96,7 +115,6 @@ function FloatingStars() {
     </div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────
 
 // ── Meertalige gebruiksaanwijzing ─────────────────────────────────────────
 const INSTRUCTIONS = {
@@ -109,9 +127,10 @@ const INSTRUCTIONS = {
       { icon: '📷', text: 'Consenti l\'accesso alla fotocamera: vedrai il tuo volto nello specchio.', highlight: false },
       { icon: '🔄', text: 'Importante: se torni dalla pagina Istruzioni allo Specchio, aggiorna la pagina del browser per riattivare la fotocamera.', highlight: true },
       { icon: '🎤', text: 'Tieni premuto il pulsante microfono e parla in italiano. Racconta un sogno, una paura, un desiderio.', highlight: false },
-      { icon: '🪞', text: 'Lo Specchio risponde con una frase profonda ispirata a Stefano Rossi, con traduzione in olandese.', highlight: false },
-      { icon: '🔊', text: 'La risposta viene letta ad alta voce (Gemini TTS o voce del browser come riserva).', highlight: false },
-      { icon: '💡', text: 'Usa i selettori Focus e Mood per orientare il dialogo verso sogni, talenti, paure o futuro.', highlight: false },
+      { icon: '🪞', text: 'Lo Specchio risponde con una frase profonda ispirata alle 7 Lezioni dei Daimon di Stefano Rossi, con traduzione in olandese.', highlight: false },
+      { icon: '🔊', text: 'La risposta viene letta ad alta voce. Tocca 🔊 nella bolla per riascoltare.', highlight: false },
+      { icon: '💡', text: 'Usa "Focus · Daimon" per scegliere una delle 7 Lezioni. Usa "Mood della risposta" per orientare il tono.', highlight: false },
+      { icon: '🛡️', text: 'Lo Specchio è un compagno di riflessione, non un sostituto di uno psicologo. In caso di bisogno, cerca sempre un professionista.', highlight: true },
       { icon: '💾', text: 'Salva il tuo percorso con il pulsante Salva. Ricomincia con il pulsante Riavvia.', highlight: false },
       { icon: '🆓', text: 'Chiave API gratuita su: aistudio.google.com — scegli "Get API Key".', highlight: false },
     ],
@@ -123,11 +142,12 @@ const INSTRUCTIONS = {
     steps: [
       { icon: '🔑', text: 'Voer je Gemini API-sleutel in via de knop "Configura API Key" onderaan.', highlight: false },
       { icon: '📷', text: 'Geef toegang tot de camera: je ziet je eigen gezicht in de spiegel.', highlight: false },
-      { icon: '🔄', text: 'Let op: keer je terug van de Instructies naar de Spiegel, ververs dan de pagina (herladen) om de camera opnieuw te activeren.', highlight: true },
+      { icon: '🔄', text: 'Let op: keer je terug van de Instructies naar de Spiegel, ververs dan de pagina om de camera opnieuw te activeren.', highlight: true },
       { icon: '🎤', text: 'Houd de microfoonknop ingedrukt en spreek Italiaans. Vertel een droom, een angst, een wens.', highlight: false },
-      { icon: '🪞', text: 'De Spiegel antwoordt met een diepe zin geïnspireerd op Stefano Rossi, met Nederlandse vertaling.', highlight: false },
-      { icon: '🔊', text: 'Het antwoord wordt hardop voorgelezen (Gemini TTS of browserstem als reserveoptie).', highlight: false },
-      { icon: '💡', text: 'Gebruik de Focus- en Mood-knoppen om het gesprek te richten op dromen, talenten, angsten of toekomst.', highlight: false },
+      { icon: '🪞', text: 'De Spiegel antwoordt met een diepe zin geïnspireerd op de 7 Lessen van de Daimon van Stefano Rossi, met Nederlandse vertaling.', highlight: false },
+      { icon: '🔊', text: 'Het antwoord wordt hardop voorgelezen. Tik op 🔊 in de tekstballon om opnieuw te luisteren.', highlight: false },
+      { icon: '💡', text: 'Gebruik "Focus · Daimon" om een van de 7 Lessen te kiezen. Gebruik "Mood della risposta" om de toon te bepalen.', highlight: false },
+      { icon: '🛡️', text: 'De Spiegel is een reflectie-metgezel, geen vervanging van een psycholoog. Bij ernstige nood: bel 113 of chat op www.113.nl.', highlight: true },
       { icon: '💾', text: 'Sla je pad op met de Opslaan-knop. Begin opnieuw met de Herstart-knop.', highlight: false },
       { icon: '🆓', text: 'Gratis API-sleutel via: aistudio.google.com — kies "Get API Key".', highlight: false },
     ],
@@ -141,9 +161,10 @@ const INSTRUCTIONS = {
       { icon: '📷', text: 'Allow camera access: you will see your face in the mirror.', highlight: false },
       { icon: '🔄', text: 'Important: when returning from the Instructions page to the Mirror, refresh the browser page to reactivate the camera.', highlight: true },
       { icon: '🎤', text: 'Hold the microphone button and speak Italian. Share a dream, a fear, a wish.', highlight: false },
-      { icon: '🪞', text: 'The Mirror responds with a deep phrase inspired by Stefano Rossi, with a Dutch translation.', highlight: false },
-      { icon: '🔊', text: 'The response is read aloud (Gemini TTS or browser voice as fallback).', highlight: false },
-      { icon: '💡', text: 'Use the Focus and Mood selectors to guide the dialogue toward dreams, talents, fears or the future.', highlight: false },
+      { icon: '🪞', text: 'The Mirror responds with a deep phrase inspired by Stefano Rossi\'s 7 Lessons of the Daimon, with a Dutch translation.', highlight: false },
+      { icon: '🔊', text: 'The response is read aloud. Tap 🔊 in the bubble to listen again.', highlight: false },
+      { icon: '💡', text: 'Use "Focus · Daimon" to choose one of the 7 Lessons. Use "Mood della risposta" to shape the tone.', highlight: false },
+      { icon: '🛡️', text: 'The Mirror is a companion for reflection, not a replacement for a psychologist. In times of serious need, always seek professional help.', highlight: true },
       { icon: '💾', text: 'Save your journey with the Save button. Start over with the Restart button.', highlight: false },
       { icon: '🆓', text: 'Free API key at: aistudio.google.com — choose "Get API Key".', highlight: false },
     ],
@@ -173,6 +194,16 @@ function InstructionsPage({ onBack }: { onBack: () => void }) {
 
       <h2 style={styles.instrTitle}>🪞 {content.title}</h2>
 
+      {/* De 7 Lezioni samengevat */}
+      <div style={styles.daimonBox}>
+        <p style={styles.daimonTitle}>✦ Le 7 Lezioni dei Daimon</p>
+        {FOCUS_OPTIONS.map((f, i) => (
+          <p key={i} style={styles.daimonItem}>
+            <span style={styles.daimonNum}>{i + 1}. </span>{f.daimon}
+          </p>
+        ))}
+      </div>
+
       <div style={styles.instrSteps}>
         {content.steps.map((step, i) => (
           <div key={i} style={{ ...styles.instrStep, ...(step.highlight ? styles.instrStepHighlight : {}) }}>
@@ -191,7 +222,6 @@ function InstructionsPage({ onBack }: { onBack: () => void }) {
     </motion.div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────
 
 export default function App() {
   const [page, setPage] = useState<'mirror' | 'instructions'>('mirror');
@@ -212,7 +242,6 @@ export default function App() {
   const recognitionRef = useRef<any>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // AudioContext eenmalig aanmaken/hergebruiken (vereist door DuckDuckGo, Safari, Edge)
   const getAudioCtx = (): AudioContext => {
     if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
       audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -251,7 +280,6 @@ export default function App() {
     setStatus('Chiave salvata! · Sleutel opgeslagen!');
   };
 
-  // Wacht tot browser-stemmen geladen zijn (nodig op mobiel/Samsung)
   const getVoices = (): Promise<SpeechSynthesisVoice[]> =>
     new Promise(resolve => {
       const v = window.speechSynthesis.getVoices();
@@ -288,9 +316,8 @@ export default function App() {
         return;
       }
     } catch {
-      // stil falen -> browser TTS
+      // browser TTS fallback
     }
-    // Browser TTS fallback — wacht op voices (essentieel op Samsung/mobiel)
     window.speechSynthesis.cancel();
     const voices = await getVoices();
     const itVoice = voices.find(v => v.lang.startsWith('it-'))
@@ -335,7 +362,8 @@ export default function App() {
 
   const generateAIResponse = useCallback(async (history: Message[]) => {
     setIsThinking(true);
-    const systemInstruction = `${SYSTEM_PROMPT}\nFocus attuale: ${focus}. Mood: ${mood}.`;
+    const focusObj = FOCUS_OPTIONS.find(f => f.value === focus);
+    const systemInstruction = `${SYSTEM_PROMPT}\nLezione dei Daimon attiva: "${focusObj?.daimon}". Mood della risposta: ${mood}.`;
 
     try {
       const aiInstance = getAI();
@@ -349,10 +377,9 @@ export default function App() {
       let attempt = 0;
       const result = await fetchWithRetry(async () => {
         attempt++;
-        // Poging 1: snel model (2.5-flash); bij traag/fout → fallback naar 2.0-flash
         const model = attempt === 1 ? "gemini-2.5-flash" : "gemini-2.0-flash";
-        if (attempt === 2) setStatus(`Tentativo 2 con modello veloce... · Poging 2 met sneller model...`);
-        if (attempt === 3) setStatus(`Ultimo tentativo... · Laatste poging...`);
+        if (attempt === 2) setStatus('Tentativo 2 con modello veloce... · Poging 2 met sneller model...');
+        if (attempt === 3) setStatus('Ultimo tentativo... · Laatste poging...');
         return aiInstance.models.generateContent({
           model,
           contents: contents.length ? contents : [{ role: 'user', parts: [{ text: 'Inizia il dialogo con una frase ispiratrice.' }] }],
@@ -375,15 +402,11 @@ export default function App() {
       setIsThinking(false);
       const isOverload = err?.message?.includes('overloaded') || err?.message?.includes('503');
       const isTimeout = err?.message?.includes('timeout');
-
-      let errIt: string;
-      let errNl: string;
-      let errStatus: string;
-
+      let errIt: string, errNl: string, errStatus: string;
       if (isOverload) {
-        errIt = "Lo specchio e' momentaneamente occupato. I server Gemini sono affollati — in questo momento si sveglia l'America. Riprova tra qualche minuto in un momento piu' tranquillo.";
-        errNl = "De spiegel is even bezet. De Gemini-servers zijn druk bezet — Amerika wordt nu wakker. Probeer het over enkele minuten opnieuw op een rustiger moment.";
-        errStatus = "Server bezet · Server occupato — probeer later";
+        errIt = "Lo specchio è momentaneamente occupato. I server Gemini sono affollati. Riprova tra qualche minuto.";
+        errNl = "De spiegel is even bezet. De Gemini-servers zijn druk. Probeer het over enkele minuten opnieuw.";
+        errStatus = "Server bezet · Server occupato";
       } else if (isTimeout) {
         errIt = "La connessione ha impiegato troppo tempo. Il server risponde lentamente. Riprova tra poco.";
         errNl = "De verbinding duurde te lang. De server reageert traag. Probeer het straks opnieuw.";
@@ -393,7 +416,6 @@ export default function App() {
         errNl = "Verbinding verbroken. Controleer je netwerk of probeer het zo opnieuw.";
         errStatus = "Verbinding verbroken · Connessione persa";
       }
-
       setStatus(errStatus);
       setMessages(prev => [...prev, { role: 'error', it: errIt, nl: errNl, insight: 'pausa' }]);
       return;
@@ -424,6 +446,8 @@ export default function App() {
     a.click();
   };
 
+  const focusLabel = FOCUS_OPTIONS.find(f => f.value === focus)?.label || '';
+
   return (
     <div style={styles.app}>
       <style>{`
@@ -438,28 +462,19 @@ export default function App() {
 
       <div style={styles.bgGlow} />
 
-      {/* ── Paginawijzer ── */}
       <div style={styles.pageNav}>
-        <button
-          onClick={() => setPage('mirror')}
-          style={{ ...styles.pageNavBtn, ...(page === 'mirror' ? styles.pageNavBtnActive : {}) }}
-        >
+        <button onClick={() => setPage('mirror')}
+          style={{ ...styles.pageNavBtn, ...(page === 'mirror' ? styles.pageNavBtnActive : {}) }}>
           🪞 Spiegel
         </button>
-        <button
-          onClick={() => setPage('instructions')}
-          style={{ ...styles.pageNavBtn, ...(page === 'instructions' ? styles.pageNavBtnActive : {}) }}
-        >
+        <button onClick={() => setPage('instructions')}
+          style={{ ...styles.pageNavBtn, ...(page === 'instructions' ? styles.pageNavBtnActive : {}) }}>
           <BookOpen size={11} style={{ marginRight: 4 }} /> Istruzioni
         </button>
       </div>
 
-      {/* ════ PAGINA: INSTRUCTIES ════ */}
-      {page === 'instructions' && (
-        <InstructionsPage onBack={() => setPage('mirror')} />
-      )}
+      {page === 'instructions' && <InstructionsPage onBack={() => setPage('mirror')} />}
 
-      {/* ════ PAGINA: SPIEGEL ════ */}
       {page === 'mirror' && (
         <>
           <header style={styles.header}>
@@ -489,7 +504,7 @@ export default function App() {
                   {isSpeaking && <div style={styles.speakingRing} />}
                 </div>
               </div>
-              <div style={styles.personaBadge}>✨ Specchio dell'Anima</div>
+              <div style={styles.personaBadge}>✦ {focusLabel}</div>
             </div>
           </div>
 
@@ -504,23 +519,24 @@ export default function App() {
           <div style={styles.selectRow}>
             <div style={styles.selectGroup}>
               <label style={styles.selectLabel}>
-                <Lightbulb size={10} style={{ marginRight: 4 }} /> Focus
+                <Lightbulb size={10} style={{ marginRight: 4 }} /> Focus · Daimon
               </label>
               <select value={focus} onChange={e => setFocus(e.target.value)} style={styles.select}>
-                <option value="sogni">I tuoi Sogni</option>
-                <option value="talento">Il tuo Talento</option>
-                <option value="paure">Le tue Paure</option>
-                <option value="futuro">Il tuo Futuro</option>
+                {FOCUS_OPTIONS.map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
+                ))}
               </select>
             </div>
             <div style={styles.selectGroup}>
               <label style={styles.selectLabel}>
-                <Heart size={10} style={{ marginRight: 4 }} /> Mood
+                <Heart size={10} style={{ marginRight: 4 }} /> Mood della risposta
               </label>
               <select value={mood} onChange={e => setMood(e.target.value)} style={styles.select}>
                 <option value="riflessivo">Riflessivo</option>
                 <option value="coraggioso">Coraggioso</option>
                 <option value="gentile">Gentile</option>
+                <option value="poetico">Poetico</option>
+                <option value="diretto">Diretto</option>
               </select>
             </div>
           </div>
@@ -603,7 +619,6 @@ export default function App() {
         </>
       )}
 
-      {/* API Key modal */}
       <AnimatePresence>
         {showKeyModal && (
           <motion.div
@@ -621,15 +636,11 @@ export default function App() {
                 placeholder="Inserisci la tua chiave..."
               />
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button onClick={() => setShowKeyModal(false)} style={styles.modalBtnCancel}>
-                  Annulla
-                </button>
+                <button onClick={() => setShowKeyModal(false)} style={styles.modalBtnCancel}>Annulla</button>
                 <button
                   onClick={() => saveCustomKey((document.getElementById('keyInput') as HTMLInputElement).value)}
                   style={styles.modalBtnSave}
-                >
-                  Salva
-                </button>
+                >Salva</button>
               </div>
             </div>
           </motion.div>
@@ -667,72 +678,57 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pageNavBtn: {
     flex: 1, padding: '7px 0',
-    background: 'rgba(112,161,255,0.05)',
-    border: '1px solid rgba(112,161,255,0.15)',
-    borderRadius: 20, fontSize: 11,
-    color: 'rgba(112,161,255,0.5)', cursor: 'pointer',
-    letterSpacing: '0.08em',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: 'rgba(112,161,255,0.05)', border: '1px solid rgba(112,161,255,0.15)',
+    borderRadius: 20, fontSize: 11, color: 'rgba(112,161,255,0.5)', cursor: 'pointer',
+    letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center',
     transition: 'all 0.2s',
   },
   pageNavBtnActive: {
-    background: C.blueDim, border: `1px solid ${C.blueBorder}`,
-    color: C.blue, fontWeight: 600,
+    background: C.blueDim, border: `1px solid ${C.blueBorder}`, color: C.blue, fontWeight: 600,
   },
   instrPage: {
-    width: '100%', maxWidth: 480,
-    padding: '10px 16px 20px',
+    width: '100%', maxWidth: 480, padding: '10px 16px 20px',
     display: 'flex', flexDirection: 'column', gap: 0, zIndex: 1,
   },
-  instrLangRow: {
-    display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' as const,
-  },
+  instrLangRow: { display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' as const },
   instrLangBtn: {
-    padding: '5px 12px', borderRadius: 20,
-    border: '1px solid rgba(112,161,255,0.2)',
+    padding: '5px 12px', borderRadius: 20, border: '1px solid rgba(112,161,255,0.2)',
     background: 'transparent', color: 'rgba(112,161,255,0.5)',
     fontSize: 11, cursor: 'pointer', letterSpacing: '0.05em', transition: 'all 0.2s',
   },
   instrLangBtnActive: {
-    background: C.blueDim, border: `1px solid ${C.blueBorder}`,
-    color: C.blue, fontWeight: 600,
+    background: C.blueDim, border: `1px solid ${C.blueBorder}`, color: C.blue, fontWeight: 600,
   },
-  instrTitle: {
-    margin: '0 0 16px', fontSize: 17, fontWeight: 400,
-    color: C.blue, letterSpacing: '0.1em',
+  instrTitle: { margin: '0 0 12px', fontSize: 17, fontWeight: 400, color: C.blue, letterSpacing: '0.1em' },
+  daimonBox: {
+    background: 'rgba(112,161,255,0.06)', border: '1px solid rgba(112,161,255,0.2)',
+    borderRadius: 12, padding: '12px 16px', marginBottom: 14,
   },
-  instrSteps: {
-    display: 'flex', flexDirection: 'column' as const, gap: 8, marginBottom: 16,
+  daimonTitle: {
+    margin: '0 0 8px', fontSize: 11, color: C.blue,
+    letterSpacing: '0.15em', textTransform: 'uppercase' as const,
   },
+  daimonItem: { margin: '3px 0', fontSize: 11, color: 'rgba(224,224,240,0.7)', lineHeight: 1.5 },
+  daimonNum: { color: C.blue, fontWeight: 600 },
+  instrSteps: { display: 'flex', flexDirection: 'column' as const, gap: 8, marginBottom: 16 },
   instrStep: {
     display: 'flex', gap: 10, alignItems: 'flex-start',
     background: C.blueDim, border: `1px solid ${C.blueBorder}`,
     borderRadius: 10, padding: '9px 12px',
   },
-  instrStepHighlight: {
-    background: 'rgba(255,210,80,0.08)',
-    border: '1px solid rgba(255,210,80,0.35)',
-  },
+  instrStepHighlight: { background: 'rgba(255,210,80,0.08)', border: '1px solid rgba(255,210,80,0.35)' },
   instrStepIcon: { fontSize: 15, flexShrink: 0, marginTop: 1 },
-  instrStepText: {
-    fontSize: 12, color: 'rgba(224,224,240,0.85)',
-    lineHeight: 1.6, letterSpacing: '0.02em',
-  },
-  instrStepTextHighlight: {
-    color: 'rgba(255,230,140,0.95)',
-  },
+  instrStepText: { fontSize: 12, color: 'rgba(224,224,240,0.85)', lineHeight: 1.6, letterSpacing: '0.02em' },
+  instrStepTextHighlight: { color: 'rgba(255,230,140,0.95)' },
   instrFreeKey: {
-    display: 'flex', alignItems: 'center', gap: 8,
-    padding: '10px 14px',
-    background: 'rgba(112,161,255,0.07)',
-    border: '1px dashed rgba(112,161,255,0.25)',
+    display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px',
+    background: 'rgba(112,161,255,0.07)', border: '1px dashed rgba(112,161,255,0.25)',
     borderRadius: 10, marginTop: 4,
   },
   instrLinkText: { color: C.blue, fontSize: 12, letterSpacing: '0.03em' },
   header: {
-    width: '100%', maxWidth: 480,
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '10px 16px', zIndex: 1,
+    width: '100%', maxWidth: 480, display: 'flex', alignItems: 'center',
+    justifyContent: 'space-between', padding: '10px 16px', zIndex: 1,
   },
   title: { margin: 0, fontSize: 20, fontWeight: 300, color: C.blue, letterSpacing: '0.15em' },
   subtitle: { margin: 0, fontSize: 10, color: 'rgba(112,161,255,0.5)', letterSpacing: '0.2em', textTransform: 'uppercase' },
@@ -753,9 +749,8 @@ const styles: Record<string, React.CSSProperties> = {
   mirrorInner: { width: '100%', height: '100%', position: 'relative' },
   video: { width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' },
   mirrorOverlay: {
-    position: 'absolute', inset: 0,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    pointerEvents: 'none',
+    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+    justifyContent: 'center', pointerEvents: 'none',
   },
   noCamMsg: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 },
   noCamText: {
@@ -764,12 +759,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   speakingRing: {
     position: 'absolute', inset: -6, borderRadius: '50%',
-    border: `3px solid ${C.blue}`,
-    animation: 'pulse 1.2s ease-in-out infinite', pointerEvents: 'none',
+    border: `3px solid ${C.blue}`, animation: 'pulse 1.2s ease-in-out infinite', pointerEvents: 'none',
   },
   personaBadge: {
     marginTop: 10, background: C.blueDim, border: `1px solid ${C.blueBorder}`,
-    borderRadius: 20, padding: '4px 18px', fontSize: 12, color: C.blue, letterSpacing: '0.1em',
+    borderRadius: 20, padding: '4px 18px', fontSize: 11, color: C.blue,
+    letterSpacing: '0.08em', maxWidth: 260, textAlign: 'center',
   },
   quoteBlock: {
     width: '100%', maxWidth: 480, padding: '12px 24px', margin: '8px 0 4px',
@@ -785,8 +780,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'rgba(112,161,255,0.4)', letterSpacing: '0.2em', textTransform: 'uppercase',
   },
   selectRow: {
-    width: '100%', maxWidth: 480,
-    display: 'grid', gridTemplateColumns: '1fr 1fr',
+    width: '100%', maxWidth: 480, display: 'grid', gridTemplateColumns: '1fr 1fr',
     gap: 10, padding: '10px 16px', zIndex: 1,
   },
   selectGroup: { display: 'flex', flexDirection: 'column', gap: 4 },
@@ -796,7 +790,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   select: {
     background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.blueBorder}`,
-    borderRadius: 8, padding: '7px 10px', fontSize: 12, color: C.blue, outline: 'none',
+    borderRadius: 8, padding: '7px 10px', fontSize: 11, color: C.blue, outline: 'none',
   },
   chatBox: {
     width: '100%', maxWidth: 480, maxHeight: 190, overflowY: 'auto',
