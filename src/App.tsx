@@ -19,13 +19,20 @@ interface Message {
 
 // ── De 7 Lezioni dei Daimon als Focus-opties ──────────────────────────────
 const FOCUS_OPTIONS = [
-  { value: 'sogni',      label: '1 · I tuoi Sogni',        daimon: 'Prenditi cura dei tuoi sogni' },
-  { value: 'mentori',    label: '2 · I tuoi Mentori',       daimon: 'Riconosci i veri mentori e impara da loro' },
-  { value: 'creativita', label: '3 · La tua Creatività',    daimon: 'Coltiva la creatività' },
-  { value: 'solitudine', label: '4 · La Solitudine',        daimon: 'Fai amicizia con la solitudine' },
-  { value: 'identita',   label: '5 · Ri-conosci Te Stesso', daimon: 'Ri-conosci te stesso facendo esperienze nuove' },
-  { value: 'ferite',     label: '6 · Le tue Ferite',        daimon: 'Le ferite ti aprono al Daimon' },
-  { value: 'unicita',    label: '7 · La tua Unicità',       daimon: 'La tua unicità è preziosa' },
+  { value: 'sogni',      label: '1 · I tuoi Sogni',        daimon: 'Prenditi cura dei tuoi sogni',
+    opening: 'Dimmi... tocca il microfono e raccontami un sogno che porti con te.' },
+  { value: 'mentori',    label: '2 · I tuoi Mentori',       daimon: 'Riconosci i veri mentori e impara da loro',
+    opening: 'Dimmi... chi ti ha insegnato qualcosa di prezioso? Tocca il microfono e parlami di loro.' },
+  { value: 'creativita', label: '3 · La tua Creatività',    daimon: 'Coltiva la creatività',
+    opening: 'Dimmi... cosa vorresti creare, se non avessi paura? Tocca il microfono e condividi.' },
+  { value: 'solitudine', label: '4 · La Solitudine',        daimon: 'Fai amicizia con la solitudine',
+    opening: 'Dimmi... come stai quando sei solo con te stesso? Tocca il microfono e raccontami.' },
+  { value: 'identita',   label: '5 · Ri-conosci Te Stesso', daimon: 'Ri-conosci te stesso facendo esperienze nuove',
+    opening: 'Dimmi... cosa hai scoperto di te ultimamente? Tocca il microfono e parlami.' },
+  { value: 'ferite',     label: '6 · Le tue Ferite',        daimon: 'Le ferite ti aprono al Daimon',
+    opening: 'Dimmi... c\'è una ferita che ti ha insegnato qualcosa? Tocca il microfono, sono qui.' },
+  { value: 'unicita',    label: '7 · La tua Unicità',       daimon: 'La tua unicità è preziosa',
+    opening: 'Dimmi... cosa ti rende unico in questo mondo? Tocca il microfono e raccontami.' },
 ];
 
 const SYSTEM_PROMPT =
@@ -42,6 +49,7 @@ const SYSTEM_PROMPT =
   "   'non ce la faccio più', 'voglio sparire', 'non vale la pena vivere', rispondi prima con una frase\n" +
   "   calda e accogliente nello stile di Rossi, poi aggiungi nel campo 'it':\n" +
   "   'Se senti il peso diventare troppo, cerca un professionista che ti possa accompagnare — è un atto di coraggio, non di debolezza.'\n" +
+  "   'In Italia puoi chiamare il Telefono Amico: 02 2327 2327, oppure il Telefono Azzurro: 19696.'\n" +
   "   e nel campo 'nl' aggiungi:\n" +
   "   'Als zware gedachten je overweldigen, is er iemand die luistert: bel 113 of chat op www.113.nl.'\n" +
   "Rispondi SOLO in formato JSON: {\"it\":\"frase in italiano\",\"nl\":\"traduzione olandese\",\"insight\":\"una piccola parola chiave sul sentimento\"}";
@@ -129,8 +137,8 @@ const INSTRUCTIONS = {
       { icon: '🎤', text: 'Tieni premuto il pulsante microfono e parla in italiano. Racconta un sogno, una paura, un desiderio.', highlight: false },
       { icon: '🪞', text: 'Lo Specchio risponde con una frase profonda ispirata alle 7 Lezioni dei Daimon di Stefano Rossi, con traduzione in olandese.', highlight: false },
       { icon: '🔊', text: 'La risposta viene letta ad alta voce. Tocca 🔊 nella bolla per riascoltare.', highlight: false },
-      { icon: '💡', text: 'Usa "Focus · Daimon" per scegliere una delle 7 Lezioni. Usa "Mood della risposta" per orientare il tono.', highlight: false },
-      { icon: '🛡️', text: 'Lo Specchio è un compagno di riflessione, non un sostituto di uno psicologo. In caso di bisogno, cerca sempre un professionista.', highlight: true },
+      { icon: '💡', text: 'Usa "Focus · Daimon" per scegliere una delle 7 Lezioni. Usa "Mood Risposta" per orientare il tono.', highlight: false },
+      { icon: '🛡️', text: 'Lo Specchio è un compagno di riflessione, non un sostituto di uno psicologo. In caso di bisogno: Telefono Amico 02 2327 2327 · Telefono Azzurro 19696.', highlight: true },
       { icon: '💾', text: 'Salva il tuo percorso con il pulsante Salva. Ricomincia con il pulsante Riavvia.', highlight: false },
       { icon: '🆓', text: 'Chiave API gratuita su: aistudio.google.com — scegli "Get API Key".', highlight: false },
     ],
@@ -146,7 +154,7 @@ const INSTRUCTIONS = {
       { icon: '🎤', text: 'Houd de microfoonknop ingedrukt en spreek Italiaans. Vertel een droom, een angst, een wens.', highlight: false },
       { icon: '🪞', text: 'De Spiegel antwoordt met een diepe zin geïnspireerd op de 7 Lessen van de Daimon van Stefano Rossi, met Nederlandse vertaling.', highlight: false },
       { icon: '🔊', text: 'Het antwoord wordt hardop voorgelezen. Tik op 🔊 in de tekstballon om opnieuw te luisteren.', highlight: false },
-      { icon: '💡', text: 'Gebruik "Focus · Daimon" om een van de 7 Lessen te kiezen. Gebruik "Mood della risposta" om de toon te bepalen.', highlight: false },
+      { icon: '💡', text: 'Gebruik "Focus · Daimon" om een van de 7 Lessen te kiezen. Gebruik "Mood Risposta" om de toon te bepalen.', highlight: false },
       { icon: '🛡️', text: 'De Spiegel is een reflectie-metgezel, geen vervanging van een psycholoog. Bij ernstige nood: bel 113 of chat op www.113.nl.', highlight: true },
       { icon: '💾', text: 'Sla je pad op met de Opslaan-knop. Begin opnieuw met de Herstart-knop.', highlight: false },
       { icon: '🆓', text: 'Gratis API-sleutel via: aistudio.google.com — kies "Get API Key".', highlight: false },
@@ -163,8 +171,8 @@ const INSTRUCTIONS = {
       { icon: '🎤', text: 'Hold the microphone button and speak Italian. Share a dream, a fear, a wish.', highlight: false },
       { icon: '🪞', text: 'The Mirror responds with a deep phrase inspired by Stefano Rossi\'s 7 Lessons of the Daimon, with a Dutch translation.', highlight: false },
       { icon: '🔊', text: 'The response is read aloud. Tap 🔊 in the bubble to listen again.', highlight: false },
-      { icon: '💡', text: 'Use "Focus · Daimon" to choose one of the 7 Lessons. Use "Mood della risposta" to shape the tone.', highlight: false },
-      { icon: '🛡️', text: 'The Mirror is a companion for reflection, not a replacement for a psychologist. In times of serious need, always seek professional help.', highlight: true },
+      { icon: '💡', text: 'Use "Focus · Daimon" to choose one of the 7 Lessons. Use "Mood Risposta" to shape the tone.', highlight: false },
+      { icon: '🛡️', text: 'The Mirror is a companion for reflection, not a replacement for a psychologist. In Italy: Telefono Amico 02 2327 2327 · Telefono Azzurro 19696. In the Netherlands: 113 or www.113.nl.', highlight: true },
       { icon: '💾', text: 'Save your journey with the Save button. Start over with the Restart button.', highlight: false },
       { icon: '🆓', text: 'Free API key at: aistudio.google.com — choose "Get API Key".', highlight: false },
     ],
@@ -235,6 +243,7 @@ export default function App() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [customKey, setCustomKey] = useState(localStorage.getItem('rossi_mirror_api_key') || '');
+  const hasSpokenOpening = useRef(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -255,6 +264,24 @@ export default function App() {
   useEffect(() => {
     startCamera();
     return () => streamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
+
+  // ── Automatische openingszin bij opstarten ────────────────────────────
+  useEffect(() => {
+    if (hasSpokenOpening.current) return;
+    hasSpokenOpening.current = true;
+    const focusObj = FOCUS_OPTIONS.find(f => f.value === focus);
+    if (!focusObj) return;
+    const openingMsg: Message = {
+      role: 'model',
+      it: focusObj.opening,
+      nl: '',
+      insight: 'benvenuto',
+    };
+    setTimeout(() => {
+      setMessages([openingMsg]);
+      speakIt(focusObj.opening);
+    }, 1200);
   }, []);
 
   const startCamera = async () => {
@@ -427,7 +454,20 @@ export default function App() {
     setMessages([]);
     setScore(0);
     setStatus('Nuovo cammino · Nieuw pad');
-    setTimeout(() => generateAIResponse([]), 300);
+    // Openingszin opnieuw afspelen bij reset, gebaseerd op huidig thema
+    const focusObj = FOCUS_OPTIONS.find(f => f.value === focus);
+    if (focusObj) {
+      setTimeout(() => {
+        const openingMsg: Message = {
+          role: 'model',
+          it: focusObj.opening,
+          nl: '',
+          insight: 'benvenuto',
+        };
+        setMessages([openingMsg]);
+        speakIt(focusObj.opening);
+      }, 300);
+    }
   };
 
   const saveTranscript = () => {
@@ -528,8 +568,9 @@ export default function App() {
               </select>
             </div>
             <div style={styles.selectGroup}>
+              {/* GEWIJZIGD: "Mood della Risposta" → "Mood Risposta" voor betere uitlijning */}
               <label style={styles.selectLabel}>
-                <Heart size={10} style={{ marginRight: 4 }} /> Mood della risposta
+                <Heart size={10} style={{ marginRight: 4 }} /> Mood Risposta
               </label>
               <select value={mood} onChange={e => setMood(e.target.value)} style={styles.select}>
                 <option value="riflessivo">Riflessivo</option>
@@ -557,7 +598,7 @@ export default function App() {
                     <>
                       <span style={styles.bubbleIt}>{msg.it}</span>
                       {msg.insight && <span style={styles.bubbleInsight}>· {msg.insight} ·</span>}
-                      <span style={styles.bubbleNl}>{msg.nl}</span>
+                      {msg.nl && <span style={styles.bubbleNl}>{msg.nl}</span>}
                       <button
                         onClick={() => speakIt(msg.it)}
                         title="Voorlezen · Leggi ad alta voce"
