@@ -326,7 +326,7 @@ export default function App() {
           contents: [{ parts: [{ text }] }],
           config: {
             responseModalities: [Modality.AUDIO],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
           },
         })
       );
