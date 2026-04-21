@@ -347,9 +347,12 @@ export default function App() {
     }
     window.speechSynthesis.cancel();
     const voices = await getVoices();
-    const itVoice = voices.find(v => v.lang.startsWith('it-'))
-                 || voices.find(v => v.lang.startsWith('it'))
-                 || voices[0];
+    const itVoice = voices.find(v => v.lang.startsWith('it-') && v.name.toLowerCase().includes('female'))
+             || voices.find(v => v.lang.startsWith('it-') && v.name.toLowerCase().includes('woman'))
+             || voices.find(v => v.lang.startsWith('it-'))
+             || voices.find(v => v.lang.startsWith('it'))
+             || voices.find(v => v.name.toLowerCase().includes('female'))
+             || voices[0];
     const utt = new SpeechSynthesisUtterance(text);
     if (itVoice) utt.voice = itVoice;
     utt.lang = 'it-IT';
