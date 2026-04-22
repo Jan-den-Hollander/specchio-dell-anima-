@@ -332,9 +332,17 @@ export default function App() {
       );
       const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
       if (base64Audio) {
+        // PCM-aanpak: ruwe Int16 data direct decoderen — klinkt veel natuurlijker dan decodeAudioData
         const audioCtx = getAudioCtx();
-        const arrayBuffer = Uint8Array.from(atob(base64Audio), (c: string) => c.charCodeAt(0)).buffer;
-        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        const binaryString = atob(base64Audio);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
+        const int16Data = new Int16Array(bytes.buffer);
+        const float32Data = new Float32Array(int16Data.length);
+        for (let i = 0; i < int16Data.length; i++) { float32Data[i] = int16Data[i] / 32768.0; }
+        const audioBuffer = audioCtx.createBuffer(1, float32Data.length, 24000);
+        audioBuffer.getChannelData(0).set(float32Data);
         const source = audioCtx.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(audioCtx.destination);
@@ -348,11 +356,11 @@ export default function App() {
     window.speechSynthesis.cancel();
     const voices = await getVoices();
     const itVoice = voices.find(v => v.lang.startsWith('it-') && v.name.toLowerCase().includes('female'))
-             || voices.find(v => v.lang.startsWith('it-') && v.name.toLowerCase().includes('woman'))
-             || voices.find(v => v.lang.startsWith('it-'))
-             || voices.find(v => v.lang.startsWith('it'))
-             || voices.find(v => v.name.toLowerCase().includes('female'))
-             || voices[0];
+                 || voices.find(v => v.lang.startsWith('it-') && v.name.toLowerCase().includes('woman'))
+                 || voices.find(v => v.lang.startsWith('it-'))
+                 || voices.find(v => v.lang.startsWith('it'))
+                 || voices.find(v => v.name.toLowerCase().includes('female'))
+                 || voices[0];
     const utt = new SpeechSynthesisUtterance(text);
     if (itVoice) utt.voice = itVoice;
     utt.lang = 'it-IT';
